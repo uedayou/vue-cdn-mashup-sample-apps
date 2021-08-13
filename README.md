@@ -1,6 +1,6 @@
 # vue-cdn-mashup-sample-apps
 
-CDN版Vue.jsで各オープンデータファイルやWeb APIとマッシュアップしたサンプルアプリを公開しています。
+CDN版Vue.jsと各オープンデータファイルやWeb APIでマッシュアップしたサンプルアプリを公開しています。
 
 ## 公開アプリ
 
