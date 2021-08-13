@@ -19,7 +19,7 @@
 </head>
 <body>
   <div id="app">
-    <div class="images" v-viewer="{ inline: true }">
+    <div class="images" v-viewer.rebuild="{ inline: true }">
       <img v-for="src in images" :src="src" :key="src">
     </div>
   </div>
