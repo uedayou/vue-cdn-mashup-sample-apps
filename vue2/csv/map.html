@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>サンプルアプリ(地図/CSV)</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+</head>
+<body>
+  <div id="app">
+    <l-map :bounds="bounds" style="position: absolute; top: 0;right: 0; bottom: 0; left: 0;">
+      <l-tile-layer :url="tileurl"></l-tile-layer>
+      <l-marker v-for="item in items" 
+        :lat-lng="{lat: item['緯度'], lon: item['経度'] }" >
+        <l-popup>
+          {{ item['施設名'] }}
+        </l-popup>
+      </l-marker>
+    </l-map>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/vue2-leaflet"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="https://unpkg.com/papaparse@latest/papaparse.min.js"></script>
+  <script type="text/javascript">
+    Vue.component('l-map', window.Vue2Leaflet.LMap);
+    Vue.component('l-tile-layer', window.Vue2Leaflet.LTileLayer);
+    Vue.component('l-marker', window.Vue2Leaflet.LMarker);
+    Vue.component('l-popup', window.Vue2Leaflet.LPopup);
+    new Vue({
+      el: '#app',
+      data() {
+        return {
+          items: [],
+          tileurl: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+          bounds: null,
+        }
+      },
+      mounted() {
+        var self = this;
+        axios.get(
+          'http://www.city.shinagawa.tokyo.jp/ct/other000081600/toilet.csv',
+          {
+            responseType: 'arraybuffer',
+            transformResponse: function(data) {
+              // shift_jis to utf8
+              return new TextDecoder("sjis").decode(data);
+            }
+          }
+        ).then(function(response) {
+          const parsed = Papa.parse(
+            response.data, 
+            {
+              header: true,
+              skipEmptyLines: true,
+            });
+          self.items = parsed.data;
+          self.items.forEach( function(item) {
+            self.setBounds(+item['緯度'], +item['経度']);
+          });
+        }).catch(function(error) {
+          console.log(error);
+        });
+      },
+      methods: {
+        setBounds: function(lat, long) {
+          if (!this.bounds) this.bounds = [[lat, long],[lat, long]];
+          if (this.bounds[1][0] > lat) this.bounds[1][0] = lat;
+          if (this.bounds[0][0] < lat) this.bounds[0][0] = lat;
+          if (this.bounds[1][1] > long) this.bounds[1][1] = long;
+          if (this.bounds[0][1] < long) this.bounds[0][1] = long;
+        }
+      }
+    });
+  </script>
+</body>
+</html>

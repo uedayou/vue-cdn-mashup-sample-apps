@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>サンプルアプリ(シンプルテーブル/GraphQL)</title>
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+</head>
+<body>
+  <div id="app">
+    <v-app>
+      <v-main>
+        <v-container class="pt-10 pb-5">
+          <h1 class="text-center py-5">サンプルアプリ(シンプルテーブル/GraphQL)</h1>
+          <p class="text-justify px-10 py-5">
+            使用APIの詳細: <a href="https://zenn.dev/uedayou/articles/ee4a2ba1b5bd0a" target="_blank" rel="noreferrer">住所で検索可能な周辺情報 GraphQL/SPARQL API</a>
+          </p>
+          <v-divider></v-divider>
+          <v-simple-table>
+            <template v-slot:default>
+              <thead>
+                <tr>
+                  <th>Label</th>
+                  <th>Address</th>
+                  <th>Geohash</th>
+                  <th>Type</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="item in items"
+                  :key="item.label"> 
+                  <td>
+                    <a :href="item.url" target="_blank" rel="noreferrer noopener">{{ item.label }}</a>
+                  </td>
+                  <td>{{ item.address }}</td>
+                  <td>{{ item.geohash }}</td>
+                  <td>{{ item.type }}</td>
+                </tr>
+              </tbody>
+            </template>
+          </v-simple-table>
+        </v-container>
+      </v-main>
+    </v-app>
+    <v-overlay :value="isLoading">
+      <v-progress-circular indeterminate size="64"></v-progress-circular>
+    </v-overlay>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+    new Vue({
+      el: '#app',
+      vuetify: new Vuetify(),
+      data() {
+        return {
+          items: [],
+          isLoading: false,
+        }
+      },
+      mounted() {
+        var self = this;
+        self.isLoading = true;
+        axios.post(
+          'https://uedayou.net/loa/search', {
+            query: `query PlaceList($query: String!, $type: String!) {
+              searchPlaces(address: $query, type: $type) {
+                label
+                address
+                url
+                geohash
+                type
+              }
+            }`,
+            variables: {
+              query: '東京都千代田区有楽町',
+              type: 'ALL',
+            }
+          })
+        .then(function(response) {
+          self.items = response.data.data.searchPlaces;
+        })
+        .catch(function(error) {
+          console.log(error);
+        })
+        .finally(function() {
+          self.isLoading = false;
+        });
+      }
+    })
+  </script>
+</body>
+</html>

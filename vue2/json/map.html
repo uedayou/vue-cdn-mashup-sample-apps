@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>サンプルアプリ(地図/JSON)</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+</head>
+<body>
+  <div id="app">
+    <l-map :bounds="bounds" style="position: absolute; top: 0;right: 0; bottom: 0; left: 0;">
+      <l-tile-layer :url="tileurl"></l-tile-layer>
+      <l-marker v-for="item in items" 
+        :lat-lng="{lat: item.lat, lon: item.long }" >
+        <l-popup>
+          <a :href="item.url" target="_blank" rel="noreferrer noopener">
+            {{ item.label }}
+          </a>
+        </l-popup>
+      </l-marker>
+    </l-map>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/vue2-leaflet"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="https://unpkg.com/papaparse@latest/papaparse.min.js"></script>
+  <script type="text/javascript">
+    Vue.component('l-map', window.Vue2Leaflet.LMap);
+    Vue.component('l-tile-layer', window.Vue2Leaflet.LTileLayer);
+    Vue.component('l-marker', window.Vue2Leaflet.LMarker);
+    Vue.component('l-popup', window.Vue2Leaflet.LPopup);
+    new Vue({
+      el: '#app',
+      data() {
+        return {
+          items: [],
+          tileurl: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+          bounds: null,
+        }
+      },
+      mounted() {
+        var self = this;
+        axios.get(
+          'https://uedayou.net/ld/library/20210505/東京都/公共図書館.json',
+        ).then(function(response) {
+          Object.keys(response.data).forEach(function(key) {
+            var data = response.data[key];
+            if (!data['http://www.w3.org/2003/01/geo/wgs84_pos#lat']) return;
+            var lat = data['http://www.w3.org/2003/01/geo/wgs84_pos#lat'][0].value;
+            var long = data['http://www.w3.org/2003/01/geo/wgs84_pos#long'][0].value;
+            self.items.push({
+              label: data['http://www.w3.org/2000/01/rdf-schema#label'][0].value,
+              url: key,
+              id: data['http://purl.org/dc/terms/identifier'][0].value,
+              pref: data['http://schema.org/addressRegion'][0].value,
+              city: data['http://schema.org/addressLocality'][0].value,
+              lat,
+              long
+            });
+            self.setBounds(lat, long);
+          });
+        }).catch( function(error) {
+          console.log(error);
+        });
+      },
+      methods: {
+        setBounds: function(lat, long) {
+          if (!this.bounds) this.bounds = [[lat, long],[lat, long]];
+          if (this.bounds[1][0] > lat) this.bounds[1][0] = lat;
+          if (this.bounds[0][0] < lat) this.bounds[0][0] = lat;
+          if (this.bounds[1][1] > long) this.bounds[1][1] = long;
+          if (this.bounds[0][1] < long) this.bounds[0][1] = long;
+        }
+      }
+    });
+  </script>
+</body>
+</html>

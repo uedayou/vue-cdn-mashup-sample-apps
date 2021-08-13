@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>サンプルアプリ(地図/SPARQL)</title>
+  <link href="https://unpkg.com/viewerjs/dist/viewer.css" rel="stylesheet">
+  <style>
+  .images {
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    padding: 5px;
+    position: relative;
+    background: #333;
+  }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="images" v-viewer="{ inline: true }">
+      <img v-for="src in images" :src="src" :key="src">
+    </div>
+  </div>
+  <p>
+    SPARQLエンドポイント: <a href="https://jpsearch.go.jp/rdf/sparql/" target="_blank" rel="noreferrer">ジャパンサーチ</a> - 葛飾北斎の絵画
+  </p>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+  <script src="https://unpkg.com/viewerjs/dist/viewer.js"></script>
+  <script src="https://unpkg.com/v-viewer/dist/v-viewer.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script type="text/javascript">
+    Vue.use(VueViewer.default);
+    new Vue({
+      el: '#app',
+      data () {
+        return {
+          images: [],
+        }
+      },
+      mounted() {
+        var self = this;
+        axios.get(
+          'https://jpsearch.go.jp/rdf/sparql/', {
+            params: {
+              query: `
+              PREFIX schema: <http://schema.org/>
+              PREFIX chname: <https://jpsearch.go.jp/entity/chname/>
+              PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+              SELECT ?s ?label ?image WHERE {
+                ?s schema:creator chname:葛飾北斎 ;
+                   schema:image ?image ; 
+                   rdfs:label ?label .
+              }
+              limit 10`,
+              output: 'json',
+            }
+          }
+        ).then(function(response) {
+          response.data.results.bindings.forEach(function(item) {
+            self.images.push(item.image.value)
+          });
+        }).catch(function(error) {
+          console.log(error);
+        });
+      },
+    });
+  </script>
+</body>
+</html>

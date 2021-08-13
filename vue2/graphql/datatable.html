@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>サンプルアプリ(データテーブル/GraphQL)</title>
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+</head>
+<body>
+  <div id="app">
+    <v-app>
+      <v-main>
+        <v-container class="pt-10 pb-5">
+          <h1 class="text-center py-5">サンプルアプリ(データテーブル/GraphQL)</h1>
+          <p class="text-justify px-10 py-5">
+            使用APIの詳細: <a href="https://zenn.dev/uedayou/articles/ee4a2ba1b5bd0a" target="_blank" rel="noreferrer">住所で検索可能な周辺情報 GraphQL/SPARQL API</a>
+          </p>
+          <v-divider></v-divider>
+          <v-card>
+            <v-card-title>
+              <v-text-field
+                v-model="search"
+                append-icon="mdi-magnify"
+                label="Search"
+                single-line
+                hide-details
+              ></v-text-field>
+            </v-card-title>
+            <v-data-table
+              :headers="headers"
+              :items="items"
+              :search="search"
+            ></v-data-table>
+          </v-card>
+        </v-container>
+      </v-main>
+    </v-app>
+    <v-overlay :value="isLoading">
+      <v-progress-circular indeterminate size="64"></v-progress-circular>
+    </v-overlay>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+    new Vue({
+      el: '#app',
+      vuetify: new Vuetify(),
+      data() {
+        return {
+          search: '',
+          headers: [],
+          items: [],
+          isLoading: false,
+        }
+      },
+      mounted() {
+        var self = this;
+        self.isLoading = true;
+        axios.post(
+          'https://uedayou.net/loa/search', {
+            query: `query PlaceList($query: String!, $type: String!) {
+              searchPlaces(address: $query, type: $type) {
+                label
+                address
+                url
+                geohash
+                type
+              }
+            }`,
+            variables: {
+              query: '東京都千代田区有楽町',
+              type: 'ALL',
+            }
+          })
+        .then(function(response) {
+          self.setData(response.data.data.searchPlaces);
+        })
+        .catch(function(error) {
+          console.log(error);
+        })
+        .finally(function() {
+          self.isLoading = false;
+        });
+      },
+      methods: {
+        setData: function(data) {
+          const _headers = [];
+          for (const d of data) {
+            const item = {};
+            for (const key in d) {
+              item[key] = d[key];
+              _headers.push(key);
+            }
+            this.items.push(item);
+          }
+          for (const h of [...new Set(_headers)]) {
+            this.headers.push({
+              text: h, value: h,
+            });
+          }
+        }
+      }
+    })
+  </script>
+</body>
+</html>

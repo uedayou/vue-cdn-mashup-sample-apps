@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>サンプルアプリ(地図/GraphQL)</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+</head>
+<body>
+  <div id="app">
+    <l-map :bounds="bounds" style="position: absolute; top: 0;right: 0; bottom: 0; left: 0;">
+      <l-tile-layer :url="tileurl"></l-tile-layer>
+      <l-marker v-for="item in items" 
+        :lat-lng="{lat: item.lat, lon: item.long }" >
+        <l-popup>
+          <a :href="item.url" target="_blank" rel="noreferrer noopener">
+            {{ item.label }}
+          </a>
+        </l-popup>
+      </l-marker>
+    </l-map>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/vue2-leaflet"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@alexpavlov/geohash-js"></script>
+  <script type="text/javascript">
+    Vue.component('l-map', window.Vue2Leaflet.LMap);
+    Vue.component('l-tile-layer', window.Vue2Leaflet.LTileLayer);
+    Vue.component('l-marker', window.Vue2Leaflet.LMarker);
+    Vue.component('l-popup', window.Vue2Leaflet.LPopup);
+    new Vue({
+      el: '#app',
+      data() {
+        return {
+          items: [],
+          tileurl: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+          bounds: null,
+        }
+      },
+      mounted() {
+        var self = this;
+        axios.post(
+          'https://uedayou.net/loa/search', {
+            query: `query PlaceList($query: String!, $type: String!) {
+              searchPlaces(address: $query, type: $type) {
+                label
+                address
+                url
+                geohash
+                type
+              }
+            }`,
+            variables: {
+              query: '東京都千代田区有楽町',
+              type: 'ALL',
+            }
+          }
+        ).then(function(response) {
+          self.items = response.data.data.searchPlaces;
+          self.items.forEach(function(item) {
+            var coord = geohash.decode(item.geohash);
+            item.lat = coord.latitude;
+            item.long = coord.longitude;
+            self.setBounds(item.lat, item.long);
+          });
+        }).catch(function(error) {
+          console.log(error);
+        });
+      },
+      methods: {
+        setBounds: function(lat, long) {
+          if (!this.bounds) this.bounds = [[lat, long],[lat, long]];
+          if (this.bounds[1][0] > lat) this.bounds[1][0] = lat;
+          if (this.bounds[0][0] < lat) this.bounds[0][0] = lat;
+          if (this.bounds[1][1] > long) this.bounds[1][1] = long;
+          if (this.bounds[0][1] < long) this.bounds[0][1] = long;
+        }
+      }
+    });
+  </script>
+</body>
+</html>

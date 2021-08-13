@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>サンプルアプリ(シンプルテーブル/CSV)</title>
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+</head>
+<body>
+  <div id="app">
+    <v-app>
+      <v-main>
+        <v-container class="pt-10 pb-5">
+          <h1 class="text-center py-5">サンプルアプリ(シンプルテーブル/CSV)</h1>
+          <p class="text-justify px-10 py-5">
+            使用CSVファイル: <a href="https://www.mhlw.go.jp/content/pcr_case_daily.csv" target="_blank" rel="noreferrer">https://www.mhlw.go.jp/content/pcr_case_daily.csv</a>
+          </p>
+          <v-divider></v-divider>
+          <v-simple-table>
+            <template v-slot:default>
+              <thead>
+                <tr>
+                  <th>日付</th>
+                  <th>国立感染症研究所</th>
+                  <th>検疫所</th>
+                  <th>地方衛生研究所・保健所</th>
+                  <th>民間検査会社</th>
+                  <th>大学等</th>
+                  <th>医療機関</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="item in items"
+                  :key="item['日付']"> 
+                  <td>{{ item['日付'] }}</td>
+                  <td>{{ item['国立感染症研究所'] }}</td>
+                  <td>{{ item['検疫所'] }}</td>
+                  <td>{{ item['地方衛生研究所・保健所'] }}</td>
+                  <td>{{ item['民間検査会社'] }}</td>
+                  <td>{{ item['大学等'] }}</td>
+                  <td>{{ item['医療機関'] }}</td>
+                </tr>
+              </tbody>
+            </template>
+          </v-simple-table>
+        </v-container>
+      </v-main>
+    </v-app>
+    <v-overlay :value="isLoading">
+      <v-progress-circular indeterminate size="64"></v-progress-circular>
+    </v-overlay>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="https://unpkg.com/papaparse@latest/papaparse.min.js"></script>
+  <script>
+    new Vue({
+      el: '#app',
+      vuetify: new Vuetify(),
+      data() {
+        return {
+          items: [],
+          isLoading: false,
+        }
+      },
+      mounted() {
+        var self = this;
+        self.isLoading = true;
+        axios.get(
+          //'https://www.mhlw.go.jp/content/pcr_case_daily.csv'
+          './pcr_case_daily.csv'
+        )
+        .then(function(response) {
+          const parsed = Papa.parse(
+            response.data, 
+            {
+              header: true,
+              skipEmptyLines: true,
+            });
+          self.items = parsed.data;
+        })
+        .catch(function(error) {
+          console.log(error);
+        })
+        .finally(function() {
+          self.isLoading = false;
+        });
+      }
+    })
+  </script>
+</body>
+</html>

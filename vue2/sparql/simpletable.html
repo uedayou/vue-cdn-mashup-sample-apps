@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>サンプルアプリ(シンプルテーブル/SPARQL)</title>
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+</head>
+<body>
+  <div id="app">
+    <v-app>
+      <v-main>
+        <v-container class="pt-10 pb-5">
+          <h1 class="text-center py-5">サンプルアプリ(シンプルテーブル/SPARQL)</h1>
+          <p class="text-justify px-10 py-5">
+            SPARQLエンドポイント: <a href="https://jpsearch.go.jp/rdf/sparql/" target="_blank" rel="noreferrer">ジャパンサーチ</a> - 京都の建築物リスト
+          </p>
+          <v-divider></v-divider>
+          <v-simple-table>
+            <template v-slot:default>
+              <thead>
+                <tr>
+                  <th>Label</th>
+                  <th>Pref</th>
+                  <th>Category</th>
+                  <th>Date</th>
+                  <th>Lat</th>
+                  <th>Long</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="item in items"
+                  :key="item.uri.value"> 
+                  <td>
+                    <a :href="item.uri.value" target="_blank" rel="noreferrer noopener">{{ item.label.value }}</a>
+                  </td>
+                  <td>{{ item.pref.value }}</td>
+                  <td>{{ item.category.value }}</td>
+                  <td>{{ item.date.value }}</td>
+                  <td>{{ item.lat.value }}</td>
+                  <td>{{ item.long.value }}</td>
+                </tr>
+              </tbody>
+            </template>
+          </v-simple-table>
+        </v-container>
+      </v-main>
+    </v-app>
+    <v-overlay :value="isLoading">
+      <v-progress-circular indeterminate size="64"></v-progress-circular>
+    </v-overlay>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+    new Vue({
+      el: '#app',
+      vuetify: new Vuetify(),
+      data() {
+        return {
+          items: [],
+          isLoading: false,
+        }
+      },
+      mounted() {
+        var self = this;
+        self.isLoading = true;
+        axios.get(
+          'https://jpsearch.go.jp/rdf/sparql/', {
+            params: {
+              query: `
+                SELECT DISTINCT ?uri ?label ?category ?date ?pref ?lat ?long WHERE {
+                  ?uri rdfs:label ?label ;
+                       rdf:type type:建築 ;
+                       schema:spatial place:京都 ;
+                       jps:spatial/jps:value/rdfs:label ?pref ;
+                       schema:temporal/rdfs:label ?date ;
+                       schema:category/rdfs:label ?category ;
+                       jps:spatial/schema:geo/schema:latitude ?lat;
+                       jps:spatial/schema:geo/schema:longitude ?long.
+                }
+                limit 1000`,
+              output: 'json',
+            }
+          }
+        )
+        .then(function(response) {
+          self.items = response.data.results.bindings;
+        })
+        .catch(function(error) {
+          console.log(error);
+        })
+        .finally(function() {
+          self.isLoading = false;
+        });
+      }
+    })
+  </script>
+</body>
+</html>
