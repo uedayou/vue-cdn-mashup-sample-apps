@@ -2,11 +2,12 @@
 <html>
 <head>
   <title>サンプルアプリ(地図/CSV)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css" />
 </head>
 <body>
   <div id="app">
-    <l-map ref="map" :bounds="bounds" style="position: absolute; top: 0;right: 0; bottom: 0; left: 0;">
+    <l-map ref="map" :bounds="bounds" @ready="onReady" style="position: absolute; top: 0;right: 0; bottom: 0; left: 0;">
       <l-tile-layer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"></l-tile-layer>
       <l-marker v-for="item in items" 
         :lat-lng="{lat: item.lat, lon: item.long }" >
@@ -68,11 +69,14 @@
             if (_bounds[1][1] > long) _bounds[1][1] = long
             if (_bounds[0][1] < long) _bounds[0][1] = long
           }
-          _bounds && map.value.leafletObject.fitBounds && map.value.leafletObject.fitBounds(_bounds)
           return _bounds
         })
 
-        return { items, bounds, map }
+        const onReady = () => {
+          map.value.leafletObject.fitBounds(bounds.value)
+        }
+
+        return { items, bounds, map, onReady }
       }
     }
 
