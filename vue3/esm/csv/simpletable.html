@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>サンプルアプリ(シンプルテーブル/CSV)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vuetify/3.0.0-beta.1/vuetify.css" />
+</head>
+<body>
+  <div id="app">
+    <v-app>
+      <v-main>
+        <v-container class="pt-10 pb-5">
+          <v-card class="my-5">
+            <h1 class="text-center py-3">サンプルアプリ(シンプルテーブル/CSV)</h1>
+            <p class="text-justify px-10 py-3">
+              使用CSVファイル: <a href="https://www.mhlw.go.jp/content/pcr_case_daily.csv" target="_blank" rel="noreferrer">https://www.mhlw.go.jp/content/pcr_case_daily.csv</a>
+            </p>
+          </v-card>
+          <v-table>
+            <template v-slot:default>
+              <thead>
+                <tr>
+                  <th>日付</th>
+                  <th>国立感染症研究所</th>
+                  <th>検疫所</th>
+                  <th>地方衛生研究所・保健所</th>
+                  <th>民間検査会社</th>
+                  <th>大学等</th>
+                  <th>医療機関</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="item in data"
+                  :key="item['日付']"> 
+                  <td>{{ item['日付'] }}</td>
+                  <td>{{ item['国立感染症研究所'] }}</td>
+                  <td>{{ item['検疫所'] }}</td>
+                  <td>{{ item['地方衛生研究所・保健所'] }}</td>
+                  <td>{{ item['民間検査会社'] }}</td>
+                  <td>{{ item['大学等'] }}</td>
+                  <td>{{ item['医療機関'] }}</td>
+                </tr>
+              </tbody>
+            </template>
+          </v-table>
+        </v-container>
+      </v-main>
+    </v-app>
+    <v-overlay v-model="loading" class="align-center justify-center">
+      <v-progress-circular indeterminate size="64"></v-progress-circular>
+    </v-overlay>
+  </div>
+  <script async src="https://ga.jspm.io/npm:es-module-shims@1.5.4/dist/es-module-shims.js"></script>
+  <script type="importmap">
+    {
+      "imports": {
+        "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js",
+        "vuetify": "https://cdnjs.cloudflare.com/ajax/libs/vuetify/3.0.0-beta.1/vuetify.esm.js",
+        "csv-parse/": "https://www.unpkg.com/csv-parse@5.0.4/"
+      }
+    }
+  </script>
+  <script type="module">
+    import { createApp } from 'vue'
+    import { createVuetify } from 'vuetify'
+    import useGetCsv from '../common/useGetCsv.js'
+
+    const url = './pcr_case_daily.csv'
+
+    const Component = {
+      setup() {
+        const { data, loading } = useGetCsv(url)
+        return { data, loading }
+      }
+    }
+    
+    const vuetify = createVuetify()
+    const app = createApp(Component)
+    app.use(vuetify)
+    app.mount('#app')
+  </script>
+</body>
+</html>

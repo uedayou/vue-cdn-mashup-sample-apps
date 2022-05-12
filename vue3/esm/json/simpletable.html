@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>サンプルアプリ(シンプルテーブル/JSON)</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vuetify/3.0.0-beta.1/vuetify.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+</head>
+<body>
+  <div id="app">
+    <v-app>
+      <v-main>
+        <v-container class="pt-5 pb-5">
+          <v-card class="my-5">
+            <h1 class="text-center py-3">サンプルアプリ(シンプルテーブル/JSON)</h1>
+            <p class="text-justify px-10 py-3">
+              使用JSONファイル: <a href="https://uedayou.net/ld/library/latest/東京都/公共図書館.json" target="_blank" rel="noreferrer">https://uedayou.net/ld/library/latest/東京都/公共図書館.json</a>
+            </p>
+          </v-card>
+          <v-table>
+            <template v-slot:default>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>名称</th>
+                  <th>URL</th>
+                  <th>都道府県</th>
+                  <th>市区町村</th>
+                  <th>緯度</th>
+                  <th>経度</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="item in items"
+                  :key="item.id">
+                  <td>{{ item.id }}</td>
+                  <td>{{ item.label }}</td>
+                  <td>{{ item.url }}</td>
+                  <td>{{ item.pref }}</td>
+                  <td>{{ item.city }}</td>
+                  <td>{{ item.lat }}</td>
+                  <td>{{ item.long }}</td>
+                </tr>
+              </tbody>
+            </template>
+          </v-table>
+        </v-container>
+      </v-main>
+    </v-app>
+    <v-overlay v-model="loading" class="align-center justify-center">
+      <v-progress-circular indeterminate size="64"></v-progress-circular>
+    </v-overlay>
+  </div>
+  <script async src="https://ga.jspm.io/npm:es-module-shims@1.5.4/dist/es-module-shims.js"></script>
+  <script type="importmap">
+    {
+      "imports": {
+        "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js",
+        "vuetify": "https://cdnjs.cloudflare.com/ajax/libs/vuetify/3.0.0-beta.1/vuetify.esm.js"
+      }
+    }
+  </script>
+  <script type="module">
+    import { createApp, computed } from 'vue'
+    import { createVuetify } from 'vuetify'
+    import useGetData from '../common/useGetData.js'
+
+    const url = 'https://uedayou.net/ld/library/latest/東京都/公共図書館.json'
+
+    const Component = {
+      setup() {
+        const { data, loading } = useGetData(url)
+        const items = computed(() => {
+          const _items = []
+          for (const key in data.value) {
+            const _data = data.value[key]
+            if (!('http://www.w3.org/2003/01/geo/wgs84_pos#lat' in _data)) continue
+            const item = {
+              label: _data['http://www.w3.org/2000/01/rdf-schema#label'][0].value,
+              url: key,
+              id: _data['http://purl.org/dc/terms/identifier'][0].value,
+              pref: _data['http://schema.org/addressRegion'][0].value,
+              city: _data['http://schema.org/addressLocality'][0].value,
+              lat: _data['http://www.w3.org/2003/01/geo/wgs84_pos#lat'][0].value,
+              long: _data['http://www.w3.org/2003/01/geo/wgs84_pos#long'][0].value
+            }
+            _items.push(item)
+          }
+          return _items
+        })
+        return { items, loading }
+      }
+    }
+    
+    const vuetify = createVuetify()
+    const app = createApp(Component)
+    app.use(vuetify)
+    app.mount('#app')
+  </script>
+</body>
+</html>

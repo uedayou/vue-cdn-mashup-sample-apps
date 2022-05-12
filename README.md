@@ -4,9 +4,37 @@ CDN版Vue.jsと各オープンデータファイルやWeb APIでマッシュア�
 
 ## 公開アプリ
 
-以下は全て Vue.js v2です。
+Vue2 と Vue3 + ES Modules の2種類あります。
 
-### CSV
+### Vue3
+
+#### CSV
+
+- [シンプルテーブル](https://github.com/uedayou/vue-cdn-mashup-sample-apps/blob/master/vue3/esm/csv/simpletable.html)
+  - [Live Demo](https://uedayou.github.io/vue-cdn-mashup-sample-apps/vue3/esm/csv/simpletable.html)
+- [地図](https://github.com/uedayou/vue-cdn-mashup-sample-apps/blob/master/vue3/esm/csv/map.html)
+  - [Live Demo](https://uedayou.github.io/vue-cdn-mashup-sample-apps/vue3/esm/csv/map.html)
+
+#### JSON
+
+- [シンプルテーブル](https://github.com/uedayou/vue-cdn-mashup-sample-apps/blob/master/vue3/esm/json/simpletable.html)
+  - [Live Demo](https://uedayou.github.io/vue-cdn-mashup-sample-apps/vue3/esm/csv/simpletable.html)
+- [地図](https://github.com/uedayou/vue-cdn-mashup-sample-apps/blob/master/vue3/esm/json/map.html)
+  - [Live Demo](https://uedayou.github.io/vue-cdn-mashup-sample-apps/vue3/esm/json/map.html)
+
+#### GraphQL
+
+- [地図](https://github.com/uedayou/vue-cdn-mashup-sample-apps/blob/master/vue3/esm/graphql/map.html)
+  - [Live Demo](https://uedayou.github.io/vue-cdn-mashup-sample-apps/vue3/esm/graphql/map.html)
+
+#### SPARQL
+
+- [画像ビューア](https://github.com/uedayou/vue-cdn-mashup-sample-apps/blob/master/vue3/esm/sparql/imageviewer.html)
+  - [Live Demo](https://uedayou.github.io/vue-cdn-mashup-sample-apps/vue3/esm/sparql/imageviewer.html)
+
+### Vue2
+
+#### CSV
 
 - [シンプルテーブル](https://github.com/uedayou/vue-cdn-mashup-sample-apps/blob/master/vue2/csv/simpletable.html)
   - [Live Demo](https://uedayou.github.io/vue-cdn-mashup-sample-apps/vue2/csv/simpletable.html)
@@ -15,7 +43,7 @@ CDN版Vue.jsと各オープンデータファイルやWeb APIでマッシュア�
 - [地図](https://github.com/uedayou/vue-cdn-mashup-sample-apps/blob/master/vue2/csv/map.html)
   - [Live Demo](https://uedayou.github.io/vue-cdn-mashup-sample-apps/vue2/csv/map.html)
 
-### JSON
+#### JSON
 
 - [シンプルテーブル](https://github.com/uedayou/vue-cdn-mashup-sample-apps/blob/master/vue2/json/simpletable.html)
   - [Live Demo](https://uedayou.github.io/vue-cdn-mashup-sample-apps/vue2/csv/simpletable.html)
@@ -24,13 +52,13 @@ CDN版Vue.jsと各オープンデータファイルやWeb APIでマッシュア�
 - [地図](https://github.com/uedayou/vue-cdn-mashup-sample-apps/blob/master/vue2/json/map.html)
   - [Live Demo](https://uedayou.github.io/vue-cdn-mashup-sample-apps/vue2/json/map.html)
 
-### REST API
+#### REST API
 
 - [シンプルテーブル](https://github.com/uedayou/vue-cdn-mashup-sample-apps/blob/master/vue2/restapi/simpletable.html)
 - [データテーブル](https://github.com/uedayou/vue-cdn-mashup-sample-apps/blob/master/vue2/restapi/datatable.html)
 - [地図](https://github.com/uedayou/vue-cdn-mashup-sample-apps/blob/master/vue2/restapi/map.html)
 
-### GraphQL
+#### GraphQL
 
 - [シンプルテーブル](https://github.com/uedayou/vue-cdn-mashup-sample-apps/blob/master/vue2/graphql/simpletable.html)
   - [Live Demo](https://uedayou.github.io/vue-cdn-mashup-sample-apps/vue2/graphql/simpletable.html)
@@ -39,7 +67,7 @@ CDN版Vue.jsと各オープンデータファイルやWeb APIでマッシュア�
 - [地図](https://github.com/uedayou/vue-cdn-mashup-sample-apps/blob/master/vue2/graphql/map.html)
   - [Live Demo](https://uedayou.github.io/vue-cdn-mashup-sample-apps/vue2/graphql/map.html)
 
-### SPARQL
+#### SPARQL
 
 - [シンプルテーブル](https://github.com/uedayou/vue-cdn-mashup-sample-apps/blob/master/vue2/sparql/simpletable.html)
   - [Live Demo](https://uedayou.github.io/vue-cdn-mashup-sample-apps/vue2/sparql/simpletable.html)

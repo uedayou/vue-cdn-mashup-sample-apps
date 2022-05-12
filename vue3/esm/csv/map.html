@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>サンプルアプリ(地図/CSV)</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css" />
+</head>
+<body>
+  <div id="app">
+    <l-map ref="map" :bounds="bounds" style="position: absolute; top: 0;right: 0; bottom: 0; left: 0;">
+      <l-tile-layer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"></l-tile-layer>
+      <l-marker v-for="item in items" 
+        :lat-lng="{lat: item.lat, lon: item.long }" >
+        <l-popup>
+          {{ item['施設名'] }}
+        </l-popup>
+      </l-marker>
+    </l-map>
+  </div>
+  <script async src="https://ga.jspm.io/npm:es-module-shims@1.5.4/dist/es-module-shims.js"></script>
+  <script type="importmap">
+    {
+      "imports": {
+        "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js",
+        "@vue-leaflet/vue-leaflet": "../lib/vue-leaflet/dist/vue-leaflet.esm.js",
+        "leaflet/": "https://unpkg.com/leaflet@1.8.0/",
+        "csv-parse/": "https://www.unpkg.com/csv-parse@5.0.4/"
+      }
+    }
+  </script>
+  <script type="module">
+    import { createApp, computed, ref } from 'vue'
+    import { LMap, LTileLayer, LMarker, LPopup } from '@vue-leaflet/vue-leaflet'
+    import useGetCsv from '../common/useGetCsv.js'
+
+    const encoding = 'sjis'
+    const url = 'https://www.city.shinagawa.tokyo.jp/ct/other000081600/toilet.csv'
+
+    const Component = {
+      components: {
+        LMap,
+        LTileLayer,
+        LMarker,
+        LPopup
+      },
+      setup() {
+        const map = ref()
+        const { data, loading } = useGetCsv(url, encoding)
+
+        const items = computed(() => {
+          const _items = []
+          for (const row of data.value) {
+            if (!('緯度' in row) || !('経度' in row)) continue
+              _items.push({
+                ...row,
+                lat: +row['緯度'],
+                long: +row['経度']
+              })
+          }
+          return _items
+        })
+
+        const bounds = computed(() => {
+          let _bounds
+          for (const {lat, long} of items.value) {
+            if (!_bounds) _bounds = [[lat, long],[lat, long]];
+            if (_bounds[1][0] > lat) _bounds[1][0] = lat
+            if (_bounds[0][0] < lat) _bounds[0][0] = lat
+            if (_bounds[1][1] > long) _bounds[1][1] = long
+            if (_bounds[0][1] < long) _bounds[0][1] = long
+          }
+          _bounds && map.value.leafletObject.fitBounds && map.value.leafletObject.fitBounds(_bounds)
+          return _bounds
+        })
+
+        return { items, bounds, map }
+      }
+    }
+
+    const app = createApp(Component)
+    app.mount('#app')
+  </script>
+</body>
+</html>
